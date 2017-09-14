@@ -48,6 +48,38 @@ IP:
 		这些网络配置信息却保存在:/etc/NetworkManager/system-connections/。
 		如果eth0同时出现在两个配置文件中，则以 /etc/network/interfaces中的配置为准。
 
+使用dnsmasq作本地DNS缓存
+Dnsmasq是一个很实用的小工具，解决局域网的需求看来非常合适，特别是网关和防火墙上。
+它同时也可以作为一个dns查询服务器，虽然不如bind等完善，但基本功能也够用了。
+它可以提供如下几个实用的功能：
+	1 提供dns服务
+	2 优先使用本地自定义dns
+	3 提供dhcp服务
+	安装 dnsmasq加速网络访问速度
+		sudo apt-get install dnsmasq
+	配置 dnsmasq
+		修改/etc/resolv.conf文件。将原有的内容全部注释，然后在第一行写上 nameserver 127.0.0.1
+		也可以使用ubuntu的网络管理小程序“Network Manager”在桌面右上角有一个它的图标，
+		右键点击该图标，选择“编辑连接”，选择你所使用的连接，点击编辑，
+		在“IPv4设置”标签的“DNS服务器”输入框中，把原有的DNS服务器删除，输入 127.0.0.1
+	在/etc目录下新建resolv.dnsmasq文件。 文件的内容为DNS服务器的地址，是真正的DNS服务器，如我的文件内容是：
+		nameserver 199.91.73.222
+		nameserver 42.120.21.30
+		nameserver 8.8.8.8
+		可以不按帮助文档所说的执行“dnsmasq-r/etc/resolv.dnsmasq”命令,如果这样，岂不是每次都得在命令行里输入，非常麻烦，
+		当然，可以考虑把这个命令写入“/etc/rc.local”文件中，让系统每次启动时帮你运行。
+		dnsmasq-r/etc/resolv.dnsmasq 命令其实是编辑“/etc/dnsmasq.conf”文件:
+		resolv-file=/etc/resolv.dnsmasq
+
+		配置/etc/dhcp3/dhclient.conf,自动连接时，
+		能在/etc/resolv.conf文件的第一行添加上“nameserver 127.0.0.1”，这样，dns缓存依然有效。
+		prepend domain-name-servers 127.0.0.1
+
+		配置/etc/ppp/peers/provider(不存在用/etc/ppp/peers/dsl-provider)
+		以防resolv.conf的设置被pppoe复盖。
+		usepeerdns
+
+
 ethtool解决线缆已拔出问题(enp3s0为网卡名称)
 	sudo ethtool -s enp3s0 autoneg off speed 100 duplex full
 

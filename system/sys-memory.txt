@@ -1,0 +1,18 @@
+检查您当前的交换分区swap
+sudo swapon -s
+设置交换分区swap
+	对于少于8GB的RAM：使用2或3倍的RAM量
+	对于超过8gb且小于64gb：使用1到1.5倍的RAM量
+	超过64gb：4gb的互换或完全没有交换。
+添加交换空间
+	使用cfdisk，检查设备上剩余多少可用空间来创建分区：
+	cfdisk /dev/sdX
+	添加交换文件
+	使用df命令检查你是否有足够的可用空间。
+	df -h
+	现在创建：将X替换为所需的交换空间
+
+swap高级设置
+cat /proc/sys/vm/swappiness
+以使用sudo sysctl vm.swappiness = 10更改它，
+或者使其永久性更改/etc/sysctl.conf并添加vm.swappiness = 10。
