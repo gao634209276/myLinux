@@ -1,0 +1,26 @@
+http://www.jianshu.com/p/f3473fe78e27
+sudo apt-get install mysql-server
+sudo apt-get install mysql-client
+sudo netstat -tap | grep mysql
+sudo /etc/init.d/mysql restart
+SET password="root";
+//启动MySQL
+sudo service mysql start;
+//脚本方式:/etc/init.d/mysql start
+
+//停用MySQL
+sudo service mysql stop;
+//脚本方式:/etc/init.d/mysql stop
+
+//停用MySQL
+sudo service mysql restart;
+//脚本方式:/etc/init.d/mysql restart;
+以系统的普通用户登录 需要(创建)有mysql的普通用户
+mysql -uys -p;
+
+//增加用户用户指定可以任意IP登录，如果想限制只能让指定IP登录请把%替换成IP地址
+mysql>CREATE USER 'hive'@'%' IDENTIFIED BY 'hive';
+
+// 给新添加的普通用户增加权限
+mysql>GRANT ALL PRIVILEGES ON * . * TO 'hive'@'%' IDENTIFIED BY 'hive' WITH GRANT OPTION
+MAX_QUERIES_PER_HOUR 0 MAX_CONNECTIONS_PER_HOUR 0 MAX_UPDATES_PER_HOUR 0 MAX_USER_CONNECTIONS 0 ;

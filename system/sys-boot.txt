@@ -1,0 +1,305 @@
+启动命令:
+1. reboot会重启系统
+2. 比较常用的是shutdown
+	常用的参数 -h  -r
+	#shutdown -h now 立即关机
+	#shutdown -h 09:09 九点九分关机
+	#shutdown -h +9 九分钟后关机
+	#shutdown -r  +30 ‘system will reboot after 30mins’
+
+-------------------------------------------------------------------------
+运行级别 ，rpm系列参考/etc/inittab
+	id:3:initdefault;表示默认运行级别为3，即命令行启动；
+	如果想启动后直接进入图形界面，可以调成5；
+	千万不要调成0和6啊，太危险，据说系统会一直开机关机
+
+Deb系
+	Ubuntu的默认开机的runlevel是5,可以用’runlevel’命令来查看当前的默认运行级别。
+	debian的runlevel级别定义如下：
+		0 – Halt，关机模式
+		1 – Single，单用户模式
+		2 - Full multi-user with display manager (GUI)
+		3 - Full multi-user with display manager (GUI)
+		4 - Full multi-user with display manager (GUI)
+		5 - Full multi-user with display manager (GUI)
+		6 – Reboot，重启
+		S - 单用户恢复模式
+	2~5级是没有任何区别的，他们为多用户模式。
+
+Rpm系
+	redhat 的runlevel级别定义如下：
+		0 – Halt，关机模式
+		1 – Single，单用户模式
+		2 – 多用户模式，但不能使用NFS（相当于Windows下的网上邻居）
+		3 – 字符界面的多用户模式
+		4 – Undefined
+		5 – Full multi-user with display manager (GUI)
+		6 – Reboot，重启
+
+切换运行级别
+	init [123456]
+	如:init 0表示关机，init 6表示重启。(...注意:别用0和6)
+
+启动步骤：
+	读取MBR信息，启动Boot Manager，Linux通常使用GRUB作为Boot Manager。
+	加载系统内核，启动init进程。init进程是Linux的根进程，所有的系统进程都是它的子进程。
+	init进程读取/etc/inittab文件中的信息，并进入预设的运行级别。
+		在这里需要说下的是，在ubuntu的6.10版本以后，就没有了/etc/inittab文件，
+		是因为inittab已经被update软件包所取代了，具体的可以查看/usr/share/doc/update目录。(没有见到这个目录)
+	执行/etc/rcS.d/目录下的脚本，然后是/etc/rcX.d/目录下的脚本，X代表的是数字0～6。
+		rcS.d和rcX.d目录下的文件都是以，S或K加上两位数字组成的，
+		其中S代表start，K代表kill，而两位数字代表启动顺序，数字越大代表级别越低。
+在init中的具体过程为:
+	内核 -> /etc/init/rc-sysint.conf -> /etc/inittab
+	-> etc/init.d/rc -> /etc/rc[0~6].d -> /etc/init.d/rc.local ->/etc/rc.local
+	虽然在ubuntu后来的版本中默认已经没有了inittab文件，但我可以自行添加。
+	以上的启动过程，并不是代表所有，以Redhat系列的CentOS5为例：
+	内核 -> /etc/inittab -> /etc/rc.sysinit (/etc/rc.d/rc.sysinit)
+	-> /etc/rc[?].d (/etc/rc.d/rc[?].d) -> /etc/rc.local(/etc/rc.d/rc.local)
+
+Ubuntu修改系统的默认启动级别
+	from:
+	http://blog.csdn.net/guanggegg/article/details/50389358
+	http://blog.csdn.net/xiangwanpeng/article/details/54407619
+	命令行级别:
+	sudo systemctl set-default multi-user.target
+	命令行启动后进入图形界面(重启仍然命令行):
+	sudo systemctl start lightdm
+	查看运行级别:
+	systemctl get-default
+	重置系统启动后默认进入图形用户界面
+	systemctl set-default graphical.target
+
+	另一种方法:
+	from:http://blog.csdn.net/qq_27803491/article/details/72876825
+	telinit *(0 -6 S)(一般没必要更改为S)
+	关于telinit与init参考:
+		http://blog.csdn.net/zjjyliuweijie/article/details/6676430
+	在/etc/rc$.d目录种定义了各种运行级别的运行服务；
+	要在ubuntu中关闭X服务，x客户端，桌面启动器等进程就行了
+
+	其他方法据说不成功
+		/etc/X11/default-display-manager文件
+		/etc/default/grub文件
+-------------------------------------------------------------------------
+启动项设置:
+Linux中设置服务自启动的三种方式
+有时候我们需要Linux系统在开机的时候自动加载某些脚本或系统服务
+主要用三种方式进行这一操作：
+	ln -s                   在/etc/rc.d/rc*.d目录中建立/etc/init.d/服务的软链接(*代表0～6七个运行级别之一）
+	chkonfig                命令行运行级别设置
+	ntsysv                  伪图形运行级别设置
+	注意:
+	Ubuntu 中系统没有了RH系统中的 chkconfig 命令
+	如果想继续使用chkconfig命令，只好自己apt-get install下了。
+		sudo apt-get install chkconfig
+Centos/Redhat:
+from:http://www.cnblogs.com/panjun-Donet/archive/2010/08/10/1796873.html
+chkconfig命令主要用来更新（启动或停止）和查询系统服务的运行级信息。谨记chkconfig不是立即自动禁止或激活一个服务，它只是简单的改变了符号连接。
+Usage:
+	chkconfig [--add][--del][--list][系统服务] 或 chkconfig [--level <等级代号>][系统服务][on/off/reset]
+	解释:
+    chkconfig --list [name]：显示所有运行级系统服务的运行状态信息（on或off）。如果指定了name，那么只显示指定的服务在不同运行级的状态。
+    chkconfig --add name：增加一项新的服务。chkconfig确保每个运行级有一项启动(S)或者杀死(K)入口。如有缺少，则会从缺省的init脚本自动建立。
+    chkconfig --del name：删除服务，并把相关符号连接从/etc/rc[0-6].d删除。
+    chkconfig [--level levels] name：设置某一服务在指定的运行级是被启动，停止还是重置。
+
+	例如:
+	chkconfig --list        #列出所有的系统服务
+	chkconfig --add httpd        #增加httpd服务
+	chkconfig --del httpd        #删除httpd服务
+	chkconfig --level httpd 2345 on        #设置httpd在运行级别为2、3、4、5的情况下都是on（开启）的状态
+	chkconfig --list        #列出系统所有的服务启动情况
+	chkconfig --list mysqld        #列出mysqld服务设置情况
+	chkconfig --level 35 mysqld on #设定mysqld在等级3和5为开机运行服务，--level 35表示操作只在等级3和5执行，on表示启动，off表示关闭
+	chkconfig mysqld on        #设定mysqld在各等级为on，“各等级”包括2、3、4、5等级
+
+
+Ubuntu:
+	ubuntu现在调整启动级别命令有:sysv-rc-conf和update-rc.d
+	第一种也是最基本的方式:
+	将一个软件安装为服务就是在/etc/init.d添加一个服务的启动脚本，
+	然后在需要启动服务的对应级别中/etc/rc[0~6].d按照文件名格式添加一个指向/etc/init.d的脚本符号链接。
+	如在ubuntu中设置apache运行级别为2:
+		sudo cp /usr/local/apache2/bin/apachectl /etc/init.d/apache2
+	    sudo ln -s /etc/init.d/apache2 /etc/rc2.d/S80apache2
+
+sysv-rc-conf使用
+	简洁的操作界面，可以使用鼠标点击，也可以使用键盘操作，
+	空格键代表选择，“X”表示开启服务，Ctrl+N下一页，Ctrl+P上一页，Q退出。
+
+update-rc.d使用
+	update-rc.d是一个Perl脚本，是用来自动升级System V类型初始化脚本，
+	简单来说就是哪些东西是你想要在系统引导初始化的时候运行的，
+	哪些是希望在关机或重启时候停止的，都可以用它来帮你设置。
+	这些脚本的连接位于/etc/rcX.d/下（X代表0～6），对应脚本位于/etc/init.d/下。
+	设置启动项/停止项：
+        update-rc.d ＜basename＞ start|stop ＜order＞ ＜runlevels＞
+	设置启动和停止(按指定顺序、在指定运行级别中启动或关闭)可以写在一起，例如：
+		sudo update-rc.d httpd start 20 2 3 4 5 . stop 60 0 1 6 .
+		表示在2、3、4、5这五个运行级别中，由小到大，第20个开始运行ushare；
+		在 0 1 6这3个运行级别中，第60个关闭apachectl。
+		注意，写在一起的时候后面的两个“.”符号一定要有，不然报错。
+	从所有的运行级别中删除指定的启动项
+		update-rc.d -f <serviceName> remove
+	禁止开机自启动
+		sudo update-rc.d <serviceName> disable
+	添加启动项：
+		sudo update-rc.d <serviceName> defaults
+		并且可以指定该服务的启动顺序：
+		update-rc.d apache2 defaults 90
+		还可以更详细的控制start与kill顺序：
+		update-rc.d apache2 defaults 20 80
+		其中前面的20是start时的运行顺序级别，80为kill时的级别。也可以写成：
+		等于一下命令:
+			sudo update-rc.d apache2 start 20 2 3 4 5 .
+	        sudo update-rc.d apache2 stop 80 0 1 6 .
+	        或者:
+			update-rc.d apache2 start 20 2 3 4 5 . stop 80 0 1 6 .
+			其中0～6为运行级别。 update-rc.d命令不仅适用Linux服务，编写的脚本同样可以用这个命令设为开机自动运行
+
+
+systemctl的使用
+-------------------------------------------------------------------------
+from:http://blog.csdn.net/u012486840/article/details/53161574
+1、原来的 service 命令与 systemctl 命令对比
+CentOS 7.x开始，CentOS开始使用systemd服务来代替daemon，
+原来管理系统启动和管理系统服务的相关命令全部由systemctl命令来代替。
+这在Ubuntu中类似(service与systemctl共存):
+daemon命令与对应的systemctl命令
+	启动服务
+		service [服务] start
+		systemctl start [unit type]
+	停止服务
+		service [服务] stop
+		systemctl stop [unit type]
+	重启服务
+		service [服务] restart
+		systemctl restart [unit type]
+	此外还是二个systemctl参数没有与service命令参数对应
+	    status：参数来查看服务运行情况
+	    reload：重新加载服务，加载更新后的配置文件（并不是所有服务都支持这个参数，比如network.service）
+
+2、原来的chkconfig 命令与 systemctl 命令对比
+2.1、设置开机启动/不启动
+	设置服务开机启动
+		chkconfig [服务] on
+		systemctl enable [unit type]
+	设备服务禁止开机启动
+		chkconfig [服务] off
+		systemctl disable [unit type]
+
+2.2、查看系统上上所有的服务
+命令格式：
+	systemctl [command] [–type=TYPE] [–all]
+	参数详解：
+		command
+			- list-units：依据unit列出所有启动的unit。加上 –all 才会列出没启动的unit;
+			- list-unit-files:依据/usr/lib/systemd/system/ 内的启动文件，列出启动文件列表
+		–type=TYPE - 为unit type, 主要有service, socket, target
+应用举例：
+	systemctl 	列出所有的系统服务
+	systemctl list-units 	列出所有启动unit
+	systemctl list-unit-files 	列出所有启动文件
+	systemctl list-units –type=service –all 	列出所有service类型的unit
+	systemctl list-units –type=service –all grep cpu 	列出 cpu电源管理机制的服务
+	systemctl list-units –type=target –all 	列出所有target
+
+3、systemctl特殊的用法
+	systemctl is-active [unit type] 	查看服务是否运行
+	systemctl is-enable [unit type] 	查看服务是否设置为开机启动
+	systemctl mask [unit type] 	注销指定服务
+	systemctl unmask [unit type] 	取消注销指定服务
+4、init 命令与systemctl命令对比
+	init 0 	systemctl poweroff 	系统关机
+	init 6 	systemctl reboot 	重新启动
+	与开关机相关的其他命令：
+		systemctl suspend 	进入睡眠模式
+		systemctl hibernate 	进入休眠模式
+		systemctl rescue 	强制进入救援模式
+		systemctl emergency 	强制进入紧急救援模式
+5、设置系统运行级别
+5.1、运行级别对应表(init级别与对应的systemctl target)
+	0 	shutdown.target
+	1 	emergency.target
+	2 	rescure.target
+	3 	multi-user.target
+	4 	无
+	5 	graphical.target
+	6 	无
+	此外还是一个getty.target用来设置tty的数量。
+5.2、设置运行级别
+命令格式：
+	systemctl [command] [unit.target]
+参数详解：
+	command:
+	    get-default :取得当前的target
+	    set-default :设置指定的target为默认的运行级别
+	    isolate :切换到指定的运行级别
+	    unit.target :为5.1表中列出的运行级别
+例如:
+	设置默认的运行级别为mulit-user
+		systemctl set-default multi-user.target
+	在不重启的情况下，切换到运行级别mulit-user下
+		systemctl isolate multi-user.target
+	在不重启的情况下，切换到图形界面下
+		systemctl isolate graphical.target
+
+6、使用systemctl分析各服务之前的依赖关系
+systemctl list-dependencies [unit] [–reverse]
+	–reverse是用来检查寻哪个unit使用了这个unit
+应用举例：
+	#获得当前运行级别的target
+	[root@www ~]# systemctl get-default
+	multi-user.target
+	#查看当前运行级别target(mult-user)启动了哪些服务
+	[root@www ~]# systemctl list-dependencies
+	default.target
+	├─abrt-ccpp.service
+	├─abrt-oops.service
+	├─vsftpd.service
+	├─basic.target
+	│ ├─alsa-restore.service
+	│ ├─alsa-state.service
+	.....(中间省略).....
+	│ ├─sockets.target
+	│ │ ├─avahi-daemon.socket
+	│ │ ├─dbus.socket
+	.....(中间省略).....
+	│ ├─sysinit.target
+	│ │ ├─dev-hugepages.mount
+	│ │ ├─dev-mqueue.mount
+	.....(中间省略).....
+	│ └─timers.target
+	│   └─systemd-tmpfiles-clean.timer
+	├─getty.target
+	│ └─getty@tty1.service
+	└─remote-fs.target
+
+	#查看哪些target引用了当前运行级别的target
+	[root@www ~]# systemctl list-dependencies --reverse
+	default.target
+	└─graphical.target
+
+7、关闭网络服务
+在使用systemctl关闭网络服务时有一些特殊 需要同时关闭unit.servce和unit.socket
+(一下是用于Centos 7系统)
+使用systemctl查看开启的sshd服务
+	[root@www system]#  systemctl list-units --all | grep sshd
+	sshd-keygen.service loaded inactive dead        OpenSSH Server Key Generation
+	sshd.service        loaded active   running     OpenSSH server daemon
+	sshd.socket         loaded inactive dead        OpenSSH Server Socket
+	可以看到系统同时开启了 sshd.service 和 sshd.socket ,
+	如果只闭关了 sshd.service 那么 sshd.socket还在监听网络，在网络上有要求连接 sshd 时就会启动 sshd.service 。
+	因此如果想完全关闭sshd服务的话，需要同时停用 sshd.service 和 sshd.socket 。
+
+由于centos 7.x默认没有安装net-tools，因此无法使用netstat 来查看主机开发的商品。
+需要通过yum安装来获得该工具包：
+	yum -y install net-tools
+
+8、关闭防火墙firewall
+Centos 7.x 中取消了iptables, 用firewall取而代之。
+要关闭防火墙并禁止开机启动服务使用下面的命令:
+	systemctl stop firewalld.service
+	systemctl disable firewalld.service
+

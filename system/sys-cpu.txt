@@ -1,0 +1,16 @@
+/proc/cpuinfo
+	1. 物理CPU：也有人称物理处理器，与/proc/cpuinfo 中 physical id对应;
+	2. 逻辑CPU：1个物理CPU可以虚拟出多个CPU,这就是逻辑CPU，与/proc/cpuinfo 中 processor对应；
+	3. 逻辑核数：或者简称核数；1个物理CPU可能是双核心，也可能是4核心；与/proc/cpuinfo 中 core id 对应；
+	4.超线程技术：本来1个核心就运行1个线程，如果利用超线程技术，可以让1个核心运行2个线程。
+	5.每个物理CPU到底是几核呢？ cat /proc/cpuinfo  | grep 'cores'  | uniq
+	6.每个物理CPU中逻辑CPU有多个呢？（这儿的逻辑CPU可能是core,也可能超线程中的线程，或者二者皆有之）
+		cat /proc/cpuinfo | grep 'siblings' | uniq
+
+cpu信息记录在/proc/cpuinfo中
+1. 查看CPU型号
+	cat /proc/cpuinfo | grep name | sort | uniq
+2. 查看物理CPU数目
+	cat /proc/cpuinfo | grep "physical id"
+
+lscpu 命令封装cpu的统计信息

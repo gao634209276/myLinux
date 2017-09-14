@@ -1,0 +1,7 @@
+touch -d "1 day ago" xx
+touch -d "1 min ago" xx
+touch -t "1706111020
+
+find -mtime +1
+find -mmin +10
+

@@ -1,0 +1,28 @@
+## ~/.ssh/config
+# 该文件用于配置私钥对应的服务器
+# Default github user(634209276@qq.com)
+# git remote add origin git@github.com:gaoyajun/learngit.git
+# git remote set-url origin https://github.com/gaoyajun/learngit.git
+#Host是自定义的host简称,以后连接远程服务器就可以用命令ssh myhost
+
+Host github.com
+HostName github.com
+User git
+IdentityFile /home/noah/.ssh/id_rsa
+
+# Host Ark
+# HostName Ark
+# User noah
+# IdentityFile /home/noah/.ssh/id_rsa
+
+# git@git.oschina.net:634209276/spark-study.git
+Host git.osc
+HostName git.oschina.net
+User git
+IdentityFile /home/noah/.ssh/id_rsa
+
+
+Host gitlib.com
+HostName gitlib.com
+User git
+IdentityFile /home/noah/.ssh/id_rsa

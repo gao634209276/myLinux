@@ -1,0 +1,106 @@
+IP:
+	ifconfig -a  //显示所有网卡的信息
+	ifconfig eth0  //如果网卡较多，可以指定具体的网卡
+	ifconfig eth1 10.10.10.10  指定eth0的IP
+	ifconfig eth1 172.30.95.95/24 指定IP和子网掩码
+	ifconfig eth1 172.30.0.94 netmask 255.255.255.128
+	注意：ifconfig配置的IP地址都是暂时指定，并没有写入文件，一旦系统或者网卡重启，ifconfig配置的IP会丢失
+
+	在ceontos系列通过文件/etc/sysconfig/network-scripts/ifcfg-eth1配置ip
+	重启网卡(网络)
+		/etc/init.d/networking restart
+		或service networking restart
+		或ifdown eth1 && ifup eth1
+
+
+静态IP:
+	vim /etc/network/interfaces
+	此为Linux传统的配置方式，通过address、netmask、gateway等字段来配置。
+	DNS信息保存在/etc/resolv.conf文件中。
+	# 一下为interfaces默认配置:
+		auto lo
+	    iface lo inet loopback
+	    # auto 表示系统启动（boot up）时 自动加载 lo 接口
+		# 接口 lo 值为loopback表示接口 enp3s0 用做 loopback 本地回环测试
+	静态ip修改添加：（注意更换网卡名称）
+		auto enp3s0
+	    iface enp3s0 inet static
+	    address 192.168.1.100
+	    netmask 255.255.255.0
+        gateway 192.168.1.1
+    动态IP配置:
+	    auto enp2s0
+	    iface enp2s0 inet dhcp
+	配置DNS解析:
+		临时DNS是否修改
+			/etc/resolv.conf文件下可以修改DNS
+			nameserver 114.114.114.114
+			DNS是解析域名-->IP，如果已经知道某个域名对应的IP，可以把对应关系写入/etc/hosts
+			这样可以加快解析速度，因为hosts文件比DNS优先
+			/etc/resolv.conf配置是临时的,重启后失效
+		永久DNS设置:
+			vim /etc/resolvconf/resolv.conf.d/base
+			nameserver 192.168.1.1
+		然后重启网络：sudo /etc/init.d/networking restart
+	NetworkManager图形化网络配置文件
+		from:http://blog.csdn.net/dream361/article/details/65936699
+		使用图形化NetworkManager配置静态IP,在/etc/network/interfaces中是找不到静态IP的配置信息
+		这些网络配置信息却保存在:/etc/NetworkManager/system-connections/。
+		如果eth0同时出现在两个配置文件中，则以 /etc/network/interfaces中的配置为准。
+
+ethtool解决线缆已拔出问题(enp3s0为网卡名称)
+	sudo ethtool -s enp3s0 autoneg off speed 100 duplex full
+
+netstat -r //查看路由表
+设置网关
+	sudo route add default gw 219.216.xxx.xxx
+设置ip，掩码
+	sudo ifconfig enp2s0  219.216.xxx.xxx netmask 255.255.255.0 up
+调整网卡速度
+	sudo ethtool -s enp2s0 autoneg off speed 100 duplex full
+	# 有线网卡enp2s0 关闭自动协商，速度100，全双工
+
+关于网卡速度:
+	为了方便这里用ethxxx表示某一个网卡名称
+	1. 判断是千兆网卡还是百兆网卡
+		ethtool ethxxx 查看支持的速率
+		千兆网卡Speed不一定是1000M,具体通过Auto-negotiation值决定,
+		on表示开启自动协商，插上网线后会两端会自动协商一个都支持的速率；
+
+	2. Link detected
+		值为yes 表示网卡插好网线了（亮了），
+		而相反,需要插好网线，并且激活网卡（ifup ethxxx, 其实是二层up）才会yes;
+
+	3. 一个类似命令mii-tool, 查看连接状态和速率
+		如果ethtool 和mii-tool查出来的速率不同,以ethtool的值为准
+
+	4. 查看网卡驱动 ethtool -i ethxxx
+		也可以用 lspci -vvv
+
+	5. 查看网卡型号，也可以看出千兆还是万兆
+		lspci -vvv | grep Eth
+		lspci | grep Eth
+	from:http://blog.csdn.net/liugongfeng/article/details/50263733
+
+
+
+将网卡中断绑定到特定cpu(centos6.5)
+	from:http://blog.csdn.net/liugongfeng/article/details/50311071
+	中断:各个硬件设备（网卡，键盘鼠标，磁盘等等）与CPU的通信方式，
+		告诉CPU，我这儿有任务要处理，CPU中断手头的工作，先去响应硬件；
+		中断处理系统是种比较有效率的做法，linux就是采用的这种方法。中断比起轮询来说好很多.
+		为了区分不同的硬件，每个硬件有个唯一的中断号，在linux下可以查看文件
+			cat /proc/interrupts
+			第1列就是中断号，中断号数字越小，说明优先级越高；
+			第CPU0-CPUn列表示在各个CPU产生的中断次数；
+			接下来的一列表示中断控制器类型,最后列表示设备名称
+	CPU单核的时代，网卡收发包处理都会有一个CPU负责,多核CPU的出现后，按照以前网卡中断有一个cpu处理的话，明显浪费CPU资源
+	基于此出现了网卡中断绑定特定CPU的技术，目的当然是为了提高CPU利用率，将网卡中断均衡的分配到各个CPU.
+	绑定命令:
+	首先查看一下，网卡对应的中断号
+		cat /proc/interrupts | grep eth
+		cat /proc/irq/xx/smp_affinity  # xx表示上一条命令查询出的中断号
+		注意：smp_affinity和smp_affinity_list这两文件作用是一样的;
+		list是10进制，更直观，如截图eth1绑到CPU0和CPU2，
+		smp_affinity是十六进制形式，5换算成二进制0101，也表示绑定CPU0和CPU2;
+		二者是关联的，修改一个，另一个也会跟着变化；

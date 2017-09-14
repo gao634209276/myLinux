@@ -1,0 +1,10 @@
+自己删除容易误删，最好用自动删除：
+sudo apt-get autoremove
+
+Linux内核一直在更新，跟新后，旧的内核就不在使用，但旧的内核文件还在boot里面，占据着空间，
+更新几次过后boot文件就会被占满，显示boot磁盘空间不足。这时为了更新需要将不用的内核文件删除，释放空间。
+
+察看已经安装的旧的内核：
+	dpkg --get-selections|grep linux-image
+根据显示的旧内核名，逐个删除就内核．
+	sudo apt-get remove linux-image-xxx-generic

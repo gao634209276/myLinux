@@ -1,0 +1,61 @@
+http://learnworld.iteye.com/blog/1381949
+
+查看整个JVM内存状态 
+jmap -heap [pid]
+要注意的是在使用CMS GC 情况下，jmap -heap的执行有可能会导致JAVA 进程挂起
+查看JVM堆中对象详细占用情况
+jmap -histo [pid]
+导出整个JVM 中内存信息
+	jmap -dump:format=b,file=DumpFileName [pid]
+	jmap -dump:live,file=DumpFileName [pid]
+jhat是sun 1.6及以上版本中自带的一个用于分析JVM 堆DUMP 文件的工具，基于此工具可分析JVM HEAP 中对象的内存占用情况
+	jhat [DumpFileName]
+	有时你dump出来的堆很大，在启动时会报堆空间不足的错误，可以使用如下参数：
+	jhat -J-Xmx1024M [file]
+执行后等待console 中输入start HTTP server on port 7000 即可使用浏览器访问 IP：7000
+	jhat中的OQL（对象查询语言）
+	http://blog.csdn.net/gtuu0123/article/details/6039592
+
+
+不止一次，我们都萌发过想对运行中程序的底层状况一探究竟的念头。产生这种需求的原因可能是运行缓慢的服务、Java虚拟机（JVM）崩溃、挂起、死锁、频繁的JVM暂停、突然或持续的高CPU使用率、甚至于可怕的内存溢出(OOME)。好消息是现在已有许多工具能帮你得到Java虚拟机运行过程中的不同参数，这些信息有助于你了解其内部状况，从而诊断上述的各种情况。
+
+如果程序出现不正常的高内存负载、频繁无响应或内存溢出，通常最好的分析切入点是查看内存对象。幸好JVM内置了工具“jmap”，让它天生就能完成这种任务。
+
+Jmap（借助JPM的一点帮助）
+Oracle将jmap描述为一种“输出进程、核心文件、远程调试服务器的共享对象内存映射和堆内存细节”的程序。本文将使用jmap打印一张内存统计图。
+为了运行jmap，你需要知道被调试程序的PID（进程标识符）。得到PID的简单办法是使用JVM提供的jps，它能列出机器上每一个JVM进程及其PID。
+	jps命令的终端输出
+	jps
+为了打印内存统计图，我们需要打开jmap控制台程序，并输入程序的PID和“-histo:live”选项。如果不添加这个选项，jmap将完整导出该程序的堆内存,这不是我们想要的结果。所以，如果想得到程序的内存统计图，我们应该用如下命令来运行jmap：
+	命令jmap -histo:live的输出结果显示了堆中现有对象的个数
+	jmap –histo:live 45417
+
+结果中每行显示了当前堆中每种类类型的信息，包含被分配的实例个数及其消耗的字节数。
+关于内存泄露
+	每隔一段时间观察额外实例个数
+	这类数据信息的好处是，不仅非常有用而且对于很大的JVM堆也能快速反馈结果。我曾经试过检测一个运行频繁并且占用17GB堆内存的程序，使用jmap能够在1分钟内生成程序的性能统计图。
+需要注意的是，jmap不是运行分析工具，在生成统计图时JVM可能会暂停，因此当生成统计图时需要确认这种暂停对程序是可接受的。以我的经验，通常在调试一个严重bug时需要生成这种统计图，这种情况下，这些1分钟的暂停对程序来说是可接受的。这里，我们引出了下一个话题 - 半自动的运行分析工具VisualVM。
+
+VisualVM
+另一个包含于JVM中的工具是VisualVM，它的开发者将它描述为“一种集成了多个JDK命令行工具的可视化工具，它能为您提供轻量级的运行分析能力”。这样看来，VisualVM是另一种你最有可能用到的事后分析工具，一般是错误已出现或性能问题已经用传统方法（客户抱怨大多属于此类）发现。
+
+除了内存图像工具，VisualVM还提供了一个采样器和一个轻量级的剖析器（Profiler）。
+VisualVM采样器能周期采样程序CPU和内存的使用情况。得到的统计数据类似jmap的反馈，此外，你还可以通过采样得到方法调用对CPU的占用情况。它让你能快速了解周期采样过程中的方法执行次数：
+VisualVM剖析器无需对程序周期采样就可以提供类似采样器的反馈信息，它还可以收集程序在整个正常执行过程中的统计数据（通过操纵程序源代码的字节码）。从剖析器得到的这种统计数据比从采样器而来的更精确和实时。
+但是，你必须考虑的另一方面是该剖析器属于一种“暴力”分析工具。它的检测方法本质上是重新定义程序执行中的大多数类和方法，结果必然会明显减缓程序执行速度。例如，上述程序运行部分的常规分析，大约要35秒。开启VisualVM的内存剖析器后，导致程序完成相同分析要31分钟。
+
+IBM Dump Analyzer
+https://www.ibm.com/developerworks/cn/java/j-ibmtools1/
+https://segmentfault.com/a/1190000002590826
+IBM HeapAnalyzer
+https://www.ibm.com/developerworks/community/groups/service/html/communityview?communityUuid=4544bafe-c7a2-455f-9d43-eb866ea60091
+https://www.ibm.com/developerworks/community/wikis/home?lang=en#!/wiki/W3b463571efc8_4f02_99af_3cbc0da42ddc/page/IBM%20HeapAnalyzer%20Information
+
+
+
+
+
+
+
+
+
