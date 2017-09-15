@@ -17,7 +17,7 @@ IP:
 	vim /etc/network/interfaces
 	此为Linux传统的配置方式，通过address、netmask、gateway等字段来配置。
 	DNS信息保存在/etc/resolv.conf文件中。
-	# 一下为interfaces默认配置:
+		# 一下为interfaces默认配置:
 		auto lo
 	    iface lo inet loopback
 	    # auto 表示系统启动（boot up）时 自动加载 lo 接口
