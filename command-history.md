@@ -19,6 +19,9 @@
 ##ubuntu安装和查看已安装
 	http://www.cnblogs.com/forward/archive/2012/01/10/2318483.html
 
+## 微信
+	https://github.com/geeeeeeeeek/electronic-wechat/releases
+
 ## wine
 	开启 32 位架构支持：
     sudo dpkg --add-architecture i386 
@@ -56,7 +59,17 @@
 	http://www.jianshu.com/p/5b80711f304f
 	sudo apt-get install unity-tweak-tool
 	unity-tweak-tool
-
+## 视图调整
+	外观:
+		启动器图标 18
+		行为:隐藏启动器,左上角显示,开启工作区,菜单在敞口标题栏,鼠标炫富显示
+	文本输入:
+		汉语+英语,ctrl+shift切换源
+	语言:汉语,Englist,fcitx输入法
+	快捷键:截图修改,注销锁屏
+	显示:最高分辨率,菜单/标题缩放比例为1,边缘关闭,
+	系统-->通用辅助功能:大号字体 打开
+	
 ##profile set
 	http://www.2cto.com/os/201301/184129.html
 
