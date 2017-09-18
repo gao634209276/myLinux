@@ -21,7 +21,8 @@
 
 ## 微信
 	https://github.com/geeeeeeeeek/electronic-wechat/releases
-
+## 温度监控
+	http://blog.csdn.net/skykingf/article/details/46637609
 ## wine
 	开启 32 位架构支持：
     sudo dpkg --add-architecture i386 
