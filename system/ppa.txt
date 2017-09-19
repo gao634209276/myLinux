@@ -1,0 +1,35 @@
+
+Ubuntu里，PPA代表一种非稳定版本到发布，喜欢尝试鲜到人一般会加入很多PPA源。
+关于PPA到详细说明
+https://help.launchpad.net/Packaging/PPA
+
+Personal Package Archives（个人软件包档案）是Ubuntu Launchpad网站提供的一项服务，
+允许个人用户上传软件源代码，通过Launchpad进行编译并发布为2进制软件包，作为apt/新立得源供其他用户下载和更新。
+在Launchpad网站上的每一个用户和团队都可以拥有一个或多个PPA。
+
+PPA的一般形式是
+	ppa:user/ppa-name
+
+添加PPA源的命令为：
+	sudo add-apt-repository ppa:user/ppa-name
+	如:sudo add-apt-repository ppa:fyrmir/livewallpaper-daily
+    sudo apt install livewallpaper livewallpaper-config livewallpaper-indicator
+	也可以打开【软件中心】->【软件源】->【其他软件】，选择添加，在弹出的窗口中AT行里输入ppa:user/ppa-name 格式的内容。
+	添加好更新一下： sudo apt-get update
+
+错误的安装ppa导致每次更新源都会载最后出现无法下载大情况，
+	执行命令:sudo apt-get update  出现以下错误:
+	错误 http://ppa.launchpad.net lucid/main Packages  404  Not Found
+	W: 无法下载 http://ppa.launchpad.net/wengxt/fctix-nightly/ubuntu/dists/lucid/main/binary-i386/Packages.gz  404  Not Found
+	按照以下方法删除就行了
+
+
+删除命令格式则为：
+	sudo add-apt-repository -r ppa:user/ppa-name
+	如
+	sudo add-apt-repository -r ppa:eugenesan/java
+	然后进入 /etc/apt/sources.list.d 目录，将相应 ppa 源的保存文件删除。
+	最后同样更新一下。
+
+
+

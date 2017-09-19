@@ -1,38 +1,55 @@
 apt-get install 一直卡在 0%[正在等待报头]
-测试:
-ping cn.archive.ubuntu.com
-telnet cn.archive.ubuntu.com 80
-解决:
-sudo rm -rf /var/lib/apt/lists/*
-sudo rm -rf /var/cache/apt/partial/*
-sudo apt-get update
+	测试:
+	ping cn.archive.ubuntu.com
+	telnet cn.archive.ubuntu.com 80
+	解决:
+	sudo rm -rf /var/lib/apt/lists/*
+	sudo rm -rf /var/cache/apt/partial/*
+	sudo apt-get update
 
 apt-get原理:
-执行命令进行软件的安装或着更新，或者软件源的更新时，
-apt会访 问/etc/apt/sources.list内的地址，并在该网站中找到对应系统的包信息，
-例如操作系统是ubuntu，网站是deb http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse网易的，
-那么当我们执行安装的命令时，他就会对应的访问http://mirrors.163.com/ubuntu/dists/lucid/main/binary-i386/的 packages.gz，
-这个文件是服务器上软件包及其依赖关系的清单，并且用gzip压缩过了。
-apt-get update使用这个清单来确定能够获得哪些补充的软件包且他的内容会被保存在/var/lib/apt/lists内，
-通过访问这个lists确定该软件是否已安装，是否是最新版本，依赖关系是否满足，从而确定要更新内容，并进行更新，其安装过程主要是由dpkg来完成。
-总体上来说apt是倾向于下载的一个管理工具。
+	执行命令进行软件的安装或着更新，或者软件源的更新时，
+	apt会访 问/etc/apt/sources.list内的地址，并在该网站中找到对应系统的包信息，
+	例如操作系统是ubuntu，网站是deb http://mirrors.163.com/ubuntu/ precise main restricted universe multiverse网易的，
+	那么当我们执行安装的命令时，他就会对应的访问http://mirrors.163.com/ubuntu/dists/lucid/main/binary-i386/的 packages.gz，
+	这个文件是服务器上软件包及其依赖关系的清单，并且用gzip压缩过了。
+	apt-get update使用这个清单来确定能够获得哪些补充的软件包且他的内容会被保存在/var/lib/apt/lists内，
+	通过访问这个lists确定该软件是否已安装，是否是最新版本，依赖关系是否满足，从而确定要更新内容，并进行更新，其安装过程主要是由dpkg来完成。
+	总体上来说apt是倾向于下载的一个管理工具。
 常用命令:
-apt-get update 更新
-apt-get upgrade 升级
-apt-get -f install 修复依赖损坏
-apt-get autoremove 自动删除
-apt-get clean 清理
-删除旧内核版本，保留目前所用版本即可，具体命令如下：
-uname -a 查看目前使用的内核是哪个版本
-dpkg --get-selections|grep linux 显示所有的内核版本
-或者sudo apt-get remove linux-image然后用双tab只能补全提示
-sudo apt-get purge xxx完全卸载
+	apt-get update 更新
+	apt-get upgrade 升级
+	apt-get -f install 修复依赖损坏
+	apt-get autoremove 自动删除
+	apt-get clean 清理
 
-修改apt源
-备份系统默认的源（没有root权限的前面加sudo）
-cp /etc/apt/sources.list /etc/apt/sources.list.bak
-修改/etc/apt/sources.list
-apt-get update
+dpkg常用用法:
+	安装软件:dpkg -i <.deb file name>
+	列出与该包先关联的文件(安装位置):dpkg -L package
+	显示包的版本:dpkg -l package
+	移除软件（保留配置）:dpkg -r package
+	移除软件（不保留配置）:dpkg -P package
+	查找包的详细信息:dpkg -s package
+	列出deb包的内容:dpkg -c package.deb
+	dpkg –unpack package.deb     解开 deb 包的内容
+	dpkg -S keyword     搜索所属的包内容
+	dpkg –configure package     配置包
+删除旧内核版本，保留目前所用版本即可，具体命令如下：
+	uname -a 查看目前使用的内核是哪个版本
+	dpkg --get-selections|grep linux 显示所有的内核版本
+	或者sudo apt-get remove linux-image然后用双tab只能补全提示
+	sudo apt-get purge xxx完全卸载
+	dpkg -l 命令可以浏览所有安装的包，其中 rc 状态的包即卸载了包却保留了配置文件。
+	如果想要完整删除所有 rc 状态的包一个一个删还是很麻烦的，所以可以使用以下命令进行清理
+	dpkg -l | grep ^rc | cut -d' ' -f3 | sudo xargs dpkg --purge
+	或者:
+	dpkg -l | grep ^rc | awk '{print($2)}' | xargs sudo apt-get -y purge
+
+修改apt源(自带的中国源速度已经很快,不建议修改)
+	备份系统默认的源（没有root权限的前面加sudo）
+	cp /etc/apt/sources.list /etc/apt/sources.list.bak
+	修改/etc/apt/sources.list
+	apt-get update
 ali:
 # deb cdrom:[Ubuntu 16.04 LTS _Xenial Xerus_ - Release amd64 (20160420.1)]/ xenial main restricted
 deb-src http://archive.ubuntu.com/ubuntu xenial main restricted #Added by software-properties

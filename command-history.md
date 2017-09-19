@@ -4,7 +4,18 @@
 
 ##用户home下文件夹修改
 	vim .config/user-dirs.dirs
+##openssh安装
+	sudo apt-get install openssh-server
+	ps -e | grep ssh
+	netstat -tlp
+##ssh免密码
+	ssh-keygen -t rsa -P ''
+	ssh-copy-id localhost
+	scp ~/.ssh/id_rsa.pub ip:~/.ssh/authorized_keys
 
+## sudo
+	%admin ALL=(ALL) NOPASSWD: ALL
+	
 ##win qq安装
 	sudo dpkg –I fonts-wqy-microhei_0.2.0-beta-2_all.deb
 	sudo dpkg –I ttf-wqy-microhei_0.2.0-beta-2_all.deb
@@ -21,6 +32,7 @@
 
 ## 微信
 	https://github.com/geeeeeeeeek/electronic-wechat/releases
+	
 ## 温度监控
 	http://blog.csdn.net/skykingf/article/details/46637609
 ## wine
@@ -43,18 +55,6 @@
 	rm -rf ~/.local/share/icons/hicolor/256x256/apps/QQ.png
 	rm -rf ~/.fonts/simsun.ttc
 	通过上面的4条命令，就可以将我们刚刚安装好的qq完全删除掉。
-
-##openssh安装
-	sudo apt-get install openssh-server
-	ps -e | grep ssh
-	netstat -tlp
-##ssh免密码
-	ssh-keygen -t rsa -P ''
-	ssh-copy-id localhost
-	scp ~/.ssh/id_rsa.pub ip:~/.ssh/authorized_keys
-
-## sudo
-	%admin ALL=(ALL) NOPASSWD: ALL
 
 ##安装unity-tweak-tool主题
 	http://www.jianshu.com/p/5b80711f304f
@@ -158,8 +158,13 @@
 	sudo apt-get install build-essential
 	安装 5.7.0 for Linux 64-bit (715 MB) 或者更高版本
 	http://download.qt.io/official_releases/qt/5.7/5.7.0/qt-opensource-linux-x64-5.7.0.run
-	
-	
+
+## nixnote2(印象笔记)
+	https://github.com/baumgarr/nixnote2
+	sudo add-apt-repository ppa:nixnote/nixnote2-daily
+	sudo apt update
+    sudo apt install nixnote2
+
 ## wizNote
 	http://www.wiz.cn/compile-client.html
 	安装 5.7.0 for Linux 64-bit (715 MB) 或者更高版本
